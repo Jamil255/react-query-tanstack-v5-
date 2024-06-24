@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query'
-import { fetchPost } from './api/controllers/api'
+import Post from './components/Post'
 
 function App() {
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['posts'],
-    queryFn: fetchPost,
-  })
-  console.log(data, isLoading, isFetching)
-  return <></>
+
+  return (
+    <>
+      <h3 className='title'>My Post</h3>
+      <Post />
+    </>
+  )
 }
 
 export default App
