@@ -1,24 +1,55 @@
-import { useQuery } from '@tanstack/react-query'
-import React from 'react'
-import { fetchPost } from '../api/controllers/api'
-
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { getTodoFun } from '../helpers/todo'
+import { useState } from 'react'
+import axios from 'axios'
+import { BASE_URL } from '../config'
 const Post = () => {
-  const { data, isLoading, error, isError } = useQuery({
-    queryKey: ['posts'],
-    queryFn: fetchPost,
+  const [title, setTitle] = useState('')
+  const queryClient = useQueryClient()
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['todo'],
+    queryFn: getTodoFun,
   })
-  console.log(data, isLoading, isError)
+  console.log(data?.data?.data)
+  const mutation = useMutation({
+    mutationFn: async (newTitle) => {
+      const obj = {
+        title: newTitle,
+      }
+      try {
+        const data = await axios.post(`${BASE_URL}/todo`, obj)
+        console.log(data)
+      } catch (error) {
+        console.log(error.message)
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todo'] })
+    },
+    onError: () => {
+      console.log(error.message)
+    },
+  })
   return (
     <>
-      <div className='container'>
-        {data?.data?.map((post) => {
-          return (
-            <div className='post'>
-              {post?.title}
+      <div>
+        <input
+          type="text"
+          onChange={(e) => setTitle(e.target.value)}
+          name="title"
+        />
+        <button
+          onClick={() => {
+            mutation.mutate(title)
+          }}
+        >
+          create
+        </button>
+      </div>
 
-              {post?.views}
-            </div>
-          )
+      <div>
+        {data?.data?.data?.map((item) => {
+          return <li key={item._id}>{item?.title}</li>
         })}
       </div>
     </>
